@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طرح درس مشتق — امیررضا واحدی</title>
+<style>
+:root{
+  --navy:#1a3d6d; --navy2:#2a5a9a; --gold:#c9a227;
+  --ink:#1d2330; --line:#d9dfe9; --bg:#f6f8fc; --card:#ffffff;
+  --math:'Cambria Math','STIX Two Math','Latin Modern Math','Times New Roman',serif;
+  --fa:'B Nazanin','BNazanin','Nazanin','IRANNazanin','Vazirmatn',Tahoma,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; padding:0 16px 70px;
+  font-family:var(--fa);
+  font-size:14.5pt; line-height:2.05; color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 90% -10%, #e8effc 0%, transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, #fbf1d9 0%, transparent 55%),
+    var(--bg);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== نوار پیشرفت اسکرول ===== */
+.progress{
+  position:fixed; top:0; left:0; right:0; height:4px;
+  background:linear-gradient(90deg,var(--navy),var(--gold),var(--navy2));
+  transform-origin:right center; transform:scaleX(0);
+  z-index:999; border-radius:0 0 4px 4px;
+  box-shadow:0 2px 10px rgba(26,61,109,.35);
+}
+@supports (animation-timeline: scroll()){
+  .progress{ animation:grow 1s linear both; animation-timeline:scroll(root); }
+}
+@keyframes grow{ from{transform:scaleX(0)} to{transform:scaleX(1)} }
+
+/* ===== نوار ابزار بالا ===== */
+.toolbar{
+  position:sticky; top:4px; z-index:100;
+  margin:0 -16px;
+  padding:10px 20px;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 4px 20px -10px rgba(26,61,109,.25);
+}
+.toolbar-inner{
+  max-width:1040px; margin:0 auto;
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+}
+.tool-btn{
+  font-family:var(--fa);
+  font-size:13pt; font-weight:bold;
+  padding:9px 18px; border:none; border-radius:999px;
+  cursor:pointer; transition:all .25s ease;
+  display:inline-flex; align-items:center; gap:8px;
+  box-shadow:0 4px 14px -6px rgba(26,61,109,.4);
+  color:#fff;
+}
+.tool-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 22px -8px rgba(26,61,109,.55); }
+.tool-btn:active{ transform:translateY(0); }
+.tool-btn .ic{ font-size:15pt; line-height:1; }
+.share-btn{ background:linear-gradient(135deg,var(--navy),var(--navy2)); }
+.pdf-btn{ background:linear-gradient(135deg,#b83227,#e74c3c); }
+.word-btn{ background:linear-gradient(135deg,#1f4a8f,#2b579a); }
+
+/* ===== هدر ===== */
+.header-card{
+  max-width:1040px; margin:24px auto 6px;
+  padding:36px 40px; border-radius:24px; color:#fff;
+  background:linear-gradient(135deg,#16345c 0%,#1a3d6d 45%,#2a5a9a 100%);
+  box-shadow:0 24px 48px -18px rgba(22,52,92,.55);
+  position:relative; overflow:hidden;
+  animation:headerIn 1.1s cubic-bezier(.22,.9,.3,1) both;
+}
+.header-card::before{
+  content:''; position:absolute; inset:-40% -10% auto auto;
+  width:60%; height:200%;
+  background:radial-gradient(circle at 70% 20%, rgba(255,255,255,.2), transparent 60%);
+  pointer-events:none; animation:float 12s ease-in-out infinite alternate;
+}
+@keyframes float{ from{transform:translateY(-12px) rotate(-3deg)} to{transform:translateY(12px) rotate(3deg)} }
+@keyframes headerIn{ from{opacity:0; transform:translateY(-26px) scale(.98)} to{opacity:1; transform:none} }
+.header-card h1{
+  margin:0 0 14px; font-size:28pt; letter-spacing:.5px; text-align:center;
+  text-shadow:0 3px 12px rgba(0,0,0,.25); position:relative;
+}
+.header-card .meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:6px 24px; margin-top:18px; font-size:12.5pt; position:relative;
+}
+.header-card .meta p{ margin:0; }
+.header-card .meta strong{ color:var(--gold); }
+
+/* ===== کارت بخش‌ها ===== */
+.card{
+  max-width:1040px; margin:22px auto;
+  padding:30px 40px; background:var(--card); border-radius:20px;
+  box-shadow:0 12px 30px -18px rgba(26,61,109,.35), 0 0 0 1px rgba(26,61,109,.06);
+  position:relative;
+}
+h2{
+  margin:0 0 14px; padding:0 14px 10px 0;
+  border-right:6px solid var(--gold); border-bottom:1px solid var(--line);
+  font-size:20pt; color:var(--navy); letter-spacing:.3px;
+}
+h3{
+  margin:22px 0 8px; font-size:16pt; color:#2c3e60;
+  border-right:3px solid #b9c8e0; padding-right:10px;
+}
+p{margin:8px 0}
+ul,ol{padding-right:24px; margin:8px 0}
+li{margin:4px 0}
+
+/* فرمول ریاضی */
+.formula{
+  direction:ltr; text-align:center;
+  font-family:var(--math); font-size:15.5pt; color:var(--navy);
+  background:linear-gradient(135deg,#f2f6ff,#fbfcff);
+  border:1px solid #d8e1f0; border-right:5px solid var(--navy);
+  border-radius:12px; padding:14px 18px; margin:14px 0;
+  letter-spacing:.4px;
+  box-shadow:0 6px 18px -10px rgba(26,61,109,.4);
+  page-break-inside:avoid;
+}
+.formula sub{ font-size:.72em; }
+[dir="ltr"], .m{ font-family:var(--math); letter-spacing:.2px; font-size:.95em; unicode-bidi:isolate; }
+
+/* جدول‌ها */
+table{
+  width:100%; border-collapse:separate; border-spacing:0;
+  margin:14px 0; font-size:12.5pt;
+  border-radius:12px; border:1px solid var(--line);
+  overflow:hidden; page-break-inside:avoid;
+  box-shadow:0 8px 22px -18px rgba(26,61,109,.5);
+}
+th,td{
+  padding:9px 10px; text-align:center; vertical-align:middle;
+  border-bottom:1px solid var(--line); border-left:1px solid var(--line);
+}
+th:last-child, td:last-child{ border-left:none; }
+tr:last-child td{ border-bottom:none; }
+th{ background:linear-gradient(180deg,#e8eef7,#dde6f3); color:var(--navy); }
+tbody tr:nth-child(even) td{ background:#fafbfe; }
+tbody tr:hover td{ background:#eef4ff; transition:background .25s ease; }
+td[dir="ltr"]{ font-family:var(--math); }
+
+/* ریویل اسکرول‌محور */
+@supports (animation-timeline: view()){
+  .reveal{
+    animation:revealUp linear both;
+    animation-timeline:view();
+    animation-range:cover 0% cover 22%;
+  }
+}
+@keyframes revealUp{
+  from{ opacity:0; transform:translateY(34px) scale(.985); }
+  to{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation:none !important; transition:none !important; }
+}
+
+/* ===== مدال اشتراک‌گذاری ===== */
+.modal{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(10,20,40,0.62);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+  padding:20px; animation:fadeIn .28s ease;
+}
+.modal.active{ display:flex; }
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+.modal-box{
+  background:#fff; border-radius:20px;
+  padding:30px; max-width:480px; width:100%;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  position:relative;
+  animation:popIn .35s cubic-bezier(.22,.9,.3,1);
+}
+@keyframes popIn{ from{opacity:0; transform:scale(.9) translateY(20px)} to{opacity:1; transform:none} }
+.modal-box h3{
+  margin:0 0 18px; font-size:18pt; color:var(--navy);
+  border:none; padding:0; text-align:center;
+}
+.modal-close{
+  position:absolute; top:10px; left:14px;
+  background:none; border:none; cursor:pointer;
+  font-size:26pt; line-height:1; color:#999;
+  transition:color .2s, transform .2s;
+}
+.modal-close:hover{ color:#c0392b; transform:rotate(90deg); }
+.qr-wrap{
+  display:flex; justify-content:center; align-items:center;
+  min-height:240px; margin:0 0 16px;
+  background:#f8faff; border-radius:14px; padding:14px;
+  border:2px dashed #cfd9ea;
+}
+#qrImage{
+  width:240px; height:240px; display:none;
+  image-rendering:crisp-edges;
+  border-radius:8px; background:#fff; padding:4px;
+}
+#qrMessage{
+  display:none; text-align:center; color:#777;
+  font-size:12pt; line-height:1.7; padding:20px;
+}
+.hint{
+  font-size:11.5pt; color:#555; line-height:1.75;
+  background:#fff8e1; border-right:3px solid var(--gold);
+  padding:10px 12px; border-radius:8px; margin:0 0 12px;
+}
+#urlInput{
+  width:100%; padding:11px 14px;
+  font-family:var(--fa); font-size:12.5pt;
+  border:2px solid #d8e1f0; border-radius:10px;
+  direction:ltr; text-align:left;
+  transition:border-color .25s, box-shadow .25s;
+  outline:none;
+}
+#urlInput:focus{ border-color:var(--navy); box-shadow:0 0 0 4px rgba(26,61,109,.12); }
+.modal-actions{
+  display:flex; gap:10px; margin-top:14px;
+}
+.modal-actions button{
+  flex:1; padding:11px 16px;
+  font-family:var(--fa); font-size:12.5pt; font-weight:bold;
+  border:none; border-radius:10px; cursor:pointer;
+  transition:all .22s;
+}
+.btn-primary{ background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; }
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 20px -8px rgba(26,61,109,.6); }
+.btn-secondary{ background:#eef2fa; color:var(--navy); border:1px solid #d8e1f0; }
+.btn-secondary:hover{ background:#e1e9f7; }
+.btn-secondary:disabled{ opacity:.6; cursor:default; }
+
+/* ===== چاپ / PDF ===== */
+@page{ size:A4; margin:16mm 14mm; }
+@media print{
+  body{ background:#fff !important; font-size:13pt; padding:0; margin:0; }
+  .progress, .toolbar, .modal{ display:none !important; }
+  .header-card{
+    animation:none !important; box-shadow:none !important;
+    border-radius:12px; padding:22px 26px; margin:0 0 10px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .header-card::before{ display:none; }
+  .card{
+    box-shadow:none !important; border:1px solid var(--line);
+    margin:10px 0; padding:18px 22px; border-radius:12px;
+    animation:none !important;
+  }
+  .reveal{ animation:none !important; opacity:1 !important; transform:none !important; }
+  table{ box-shadow:none; }
+  th,td{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h2,h3{ page-break-after:avoid; }
+}
+@media (max-width:720px){
+  body{ font-size:13.5pt; padding:0 10px 50px; }
+  .toolbar{ padding:8px 10px; }
+  .tool-btn{ font-size:11.5pt; padding:8px 14px; }
+  .card, .header-card{ padding:20px 18px; border-radius:14px; }
+  h2{ font-size:17pt; } h3{ font-size:14.5pt; }
+  table{ font-size:11.5pt; } .formula{ font-size:13pt; padding:12px; }
+  .modal-box{ padding:22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- نوار پیشرفت اسکرول -->
+<div class="progress"></div>
+
+<!-- نوار ابزار بالا -->
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <button class="tool-btn share-btn" onclick="openShare()">
+      <span class="ic">🔗</span> اشتراک‌گذاری
+    </button>
+    <button class="tool-btn pdf-btn" onclick="savePDF()">
+      <span class="ic">📄</span> ذخیره PDF
+    </button>
+    <button class="tool-btn word-btn" onclick="saveWord()">
+      <span class="ic">📝</span> ذخیره Word
+    </button>
+  </div>
+</div>
+
+<!-- مدال اشتراک‌گذاری با QR -->
+<div class="modal" id="shareModal" onclick="if(event.target===this) closeShare()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeShare()" title="بستن">×</button>
+    <h3>اشتراک‌گذاری طرح درس</h3>
+    <div class="qr-wrap">
+      <img id="qrImage" alt="QR Code" />
+      <div id="qrMessage">برای ساخت QR، آدرس آنلاین صفحه را وارد کنید.</div>
+    </div>
+    <p class="hint">
+      QR کد فقط وقتی برای دیگران کار می‌کند که این صفحه روی یک <strong>لینک آنلاین</strong> باشد. فایل را روی GitHub Pages، Netlify یا Google Drive بگذارید و آدرسش را در کادر زیر وارد کنید.
+    </p>
+    <input id="urlInput" type="url" placeholder="https://..." />
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="updateQR()">ساخت QR</button>
+      <button class="btn-secondary" onclick="copyLink(this)">کپی لینک</button>
+    </div>
+  </div>
+</div>
+
+<main id="content">
+
+  <header class="header-card">
+    <h1>به نام خدا</h1>
+    <div class="meta">
+      <p><strong>نام ارائه‌دهنده:</strong> امیررضا واحدی</p>
+      <p><strong>نام استاد:</strong> جناب آقای شعبانی‌فر</p>
+      <p><strong>درس:</strong> اصول و روش‌های تدریس ریاضی</p>
+      <p><strong>پایه:</strong> یازدهم متوسطه دوم — حسابان ۱ / ریاضی ۲</p>
+      <p><strong>مبحث:</strong> مفهوم مشتق و تعبیر هندسی آن</p>
+      <p><strong>زمان:</strong> ۹۰ دقیقه (چهار بخش ۲۰ تا ۲۵ دقیقه‌ای)</p>
+      <p><strong>رسانه‌ها:</strong> تخته، ویدئوپروژکتور، کاربرگ، GeoGebra</p>
+    </div>
+  </header>
+
+  <section class="card reveal">
+    <h2>۱. اهداف و پیش‌نیازها</h2>
+
+    <h3>اهداف شناختی</h3>
+    <ol>
+      <li>دانش‌آموز مفهوم مشتق در یک نقطه را با تعریف حدی بیان کند.</li>
+      <li>تعبیر هندسی مشتق را به‌عنوان شیب خط مماس بر نمودار تابع توضیح دهد.</li>
+      <li>رابطه بین شیب خط قاطع، حد و شیب خط مماس را توضیح دهد.</li>
+      <li>مشتق تابع <span dir="ltr">f(x)=x²</span> را در <span dir="ltr">x=2</span> با تعریف محاسبه کند.</li>
+    </ol>
+
+    <h3>اهداف مهارتی</h3>
+    <ol>
+      <li>جدول مقادیر شیب خط قاطع را برای <span dir="ltr">h</span>های کوچک‌تر تکمیل کند.</li>
+      <li>با محاسبه حد، شیب مماس را به‌دست آورد.</li>
+      <li>ایده‌های خود را در بارش فکری دسته‌بندی و نقد کند.</li>
+      <li>با راهنمایی معلم، فرمول مشتق را کشف کند.</li>
+    </ol>
+
+    <h3>اهداف نگرشی</h3>
+    <ol>
+      <li>ارتباط ریاضی با سرعت، شیب و نرخ تغییر را ببیند.</li>
+      <li>در کاوش گروهی مشارکت کند.</li>
+      <li>ایده‌های دیگران را بدون تمسخر بشنود و نقد سازنده کند.</li>
+    </ol>
+
+    <h3>پیش‌نیازها</h3>
+    <ul>
+      <li>مفهوم تابع و نمودار آن</li>
+      <li>شیب خط و فرمول <span dir="ltr">m = (y₂ − y₁)/(x₂ − x₁)</span></li>
+      <li>مفهوم حد به‌صورت شهودی</li>
+      <li>ساده‌سازی جبری عبارت‌های کسری</li>
+    </ul>
+  </section>
+
+  <section class="card reveal">
+    <h2>۲. روش اول: پیش‌سازماندهنده</h2>
+
+    <h3>مفهوم روش</h3>
+    <p>پیش‌سازماندهنده، یک متن، جدول، نمودار یا مقایسه کوتاه است که <strong>قبل از تدریس</strong> به دانش‌آموز ارائه می‌شود تا ذهن او را برای مفهوم جدید آماده کند و بین دانسته‌های قبلی و مبحث جدید پل بزند.</p>
+
+    <h3>اجرای تدریس</h3>
+    <ol>
+      <li>معلم دو مفهوم آشنا را روی تخته می‌نویسد: <strong>سرعت متوسط</strong> و <strong>شیب خط</strong>.</li>
+      <li>از دانش‌آموزان می‌پرسد: «اگر خودرویی در ۲ ساعت ۱۲۰ کیلومتر برود، سرعت متوسط آن چقدر است؟»</li>
+      <li>سپس می‌پرسد: «اگر بخواهیم سرعت را در یک لحظه مشخص به‌دست آوریم، چه باید کرد؟»</li>
+      <li>معلم توضیح می‌دهد: «همان‌طور که برای سرعت لحظه‌ای بازه زمان را کوچک می‌کنیم، برای شیب منحنی در یک نقطه نیز دو نقطه را به هم نزدیک می‌کنیم.»</li>
+      <li>پیش‌سازماندهنده روی تخته/پروژکتور نمایش داده می‌شود.</li>
+    </ol>
+
+    <h3>مثال</h3>
+    <p>برای تابع <span dir="ltr">f(x)=x²</span> در نقطه <span dir="ltr">x=2</span>:</p>
+    <div class="formula">m<sub>AB</sub> = [(2+h)² − 2²] / h = (4 + 4h + h² − 4)/h = 4 + h</div>
+    <p>وقتی <span dir="ltr">h</span> به صفر نزدیک می‌شود، <span dir="ltr">4+h</span> به <span dir="ltr">4</span> نزدیک می‌شود. پس شیب مماس در <span dir="ltr">x=2</span> برابر <span dir="ltr">4</span> است.</p>
+
+    <h3>پیوست ۱: متن پیش‌سازماندهنده</h3>
+    <p><strong>دو مفهوم آشنا:</strong></p>
+    <table>
+      <thead>
+        <tr><th>پدیده واقعی</th><th>مفهوم ریاضی</th><th>فرمول</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>سرعت متوسط خودرو</td><td>شیب خط بین دو نقطه</td><td dir="ltr">Δx / Δt</td></tr>
+        <tr><td>شیب خط</td><td>نرخ تغییر</td><td dir="ltr">(y₂ − y₁)/(x₂ − x₁)</td></tr>
+        <tr><td>نزدیک کردن دو نقطه</td><td>حد</td><td dir="ltr">h → 0</td></tr>
+        <tr><td>شیب مماس در یک نقطه</td><td>مشتق</td><td dir="ltr">f′(a) = lim<sub>h→0</sub> [f(a+h) − f(a)] / h</td></tr>
+      </tbody>
+    </table>
+    <p><strong>پیام پیش‌سازماندهنده:</strong> «مشتق یعنی حد شیب خط‌های قاطع، وقتی دو نقطه به هم نزدیک می‌شوند؛ و این حد همان شیب خط مماس است.»</p>
+  </section>
+
+  <section class="card reveal">
+    <h2>۳. روش دوم: آزوبل</h2>
+
+    <h3>مفهوم روش</h3>
+    <p>در روش آزوبل، یادگیری معنادار از طریق ارائه سازمان‌یافته معلم و اتصال مطلب جدید به ساخت شناختی قبلی دانش‌آموز انجام می‌شود. معلم از پیش‌سازماندهنده استفاده می‌کند، مفهوم را ارائه می‌دهد، مثال می‌زند و مطالب را با هم مقایسه و تفکیک می‌کند.</p>
+
+    <h3>مراحل تدریس</h3>
+    <ol>
+      <li><strong>مرور پیش‌نیازها:</strong> شیب خط، تابع، حد شهودی.</li>
+      <li><strong>ارائه پیش‌سازماندهنده:</strong> همان پیوست ۱.</li>
+      <li><strong>ارائه مفهوم جدید:</strong> تعریف مشتق در نقطه:
+        <div class="formula">f′(a) = lim<sub>h→0</sub> [f(a+h) − f(a)] / h</div>
+      </li>
+      <li><strong>مثال حل‌شده:</strong> محاسبه مشتق <span dir="ltr">f(x)=x²</span> در <span dir="ltr">x=2</span>.</li>
+      <li><strong>تفکیک مفاهیم:</strong> مشتق در نقطه، تابع مشتق، شیب خط قاطع، شیب مماس.</li>
+      <li><strong>جمع‌بندی با نقشه مفهومی:</strong> نرخ تغییر → شیب قاطع → حد → مشتق → شیب مماس.</li>
+    </ol>
+
+    <h3>مثال</h3>
+    <div class="formula">f(x) = x² , a = 2</div>
+    <div class="formula">f′(2) = lim<sub>h→0</sub> [(2+h)² − 4]/h = lim<sub>h→0</sub> (4 + 4h + h² − 4)/h = lim<sub>h→0</sub> (4+h) = 4</div>
+    <p>پس خط مماس در نقطه <span dir="ltr">(2,4)</span> شیب <span dir="ltr">4</span> دارد:</p>
+    <div class="formula">y − 4 = 4(x − 2)</div>
+
+    <h3>پیوست ۲: کاربرگ آزوبل</h3>
+    <p><strong>الف) نقشه مفهومی را کامل کنید:</strong> نرخ تغییر → ................ → حد → ................ → شیب مماس</p>
+    <p><strong>ب) جدول را کامل کنید:</strong></p>
+    <table>
+      <thead><tr><th>مقدار h</th><th>مقدار [(2+h)² − 4] / h</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>................</td></tr>
+        <tr><td>0.5</td><td>................</td></tr>
+        <tr><td>0.1</td><td>................</td></tr>
+        <tr><td>0.01</td><td>................</td></tr>
+      </tbody>
+    </table>
+    <p><strong>ج) نتیجه‌گیری:</strong> با نزدیک شدن <span dir="ltr">h</span> به صفر، شیب خط قاطع به چه عددی نزدیک می‌شود؟ ................ / این عدد چه معنای هندسی دارد؟ ................</p>
+    <p><strong>د) تمرین:</strong> مشتق <span dir="ltr">f(x)=x²</span> را در <span dir="ltr">x=3</span> با تعریف حساب کنید.</p>
+  </section>
+
+  <section class="card reveal">
+    <h2>۴. روش سوم: برونر</h2>
+
+    <h3>مفهوم روش</h3>
+    <p>در روش برونر، دانش‌آموز با راهنمایی معلم و از طریق کشف، به فرمول و مفهوم می‌رسد. آموزش از مرحله عملی/عینی به تصویری و سپس نمادی پیش می‌رود.</p>
+
+    <h3>مراحل تدریس</h3>
+    <ol>
+      <li><strong>مرحله عملی:</strong> دانش‌آموزان روی نمودار <span dir="ltr">f(x)=x²</span> دو نقطه را انتخاب می‌کنند و خط قاطع را رسم می‌کنند.</li>
+      <li><strong>مرحله تصویری:</strong> با نرم‌افزار یا تخته، نقطه دوم را به نقطه اول نزدیک می‌کنیم و تغییر شیب خط قاطع را می‌بینند.</li>
+      <li><strong>مرحله نمادی:</strong> جدول مقادیر <span dir="ltr">h</span> و شیب قاطع را تکمیل می‌کنند.</li>
+      <li><strong>کشف:</strong> دانش‌آموز خود نتیجه می‌گیرد که حد شیب قاطع، شیب مماس است.</li>
+      <li><strong>نتیجه‌گیری:</strong> فرمول مشتق در نقطه نوشته می‌شود.</li>
+    </ol>
+
+    <h3>مثال</h3>
+    <p>برای <span dir="ltr">f(x)=x²</span> و <span dir="ltr">a=2</span>:</p>
+    <table>
+      <thead><tr><th>مقدار h</th><th>شیب قاطع 4+h</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>5</td></tr>
+        <tr><td>0.5</td><td>4.5</td></tr>
+        <tr><td>0.1</td><td>4.1</td></tr>
+        <tr><td>0.01</td><td>4.01</td></tr>
+      </tbody>
+    </table>
+    <p>دانش‌آموز کشف می‌کند که با <span dir="ltr">h→0</span>، شیب به <span dir="ltr">4</span> نزدیک می‌شود.</p>
+
+    <h3>پیوست ۳: کاربرگ برونر</h3>
+    <p><strong>هدف:</strong> کشف رابطه بین شیب خط قاطع و شیب خط مماس.</p>
+    <ol>
+      <li>نمودار <span dir="ltr">y=x²</span> را رسم کنید و نقطه <span dir="ltr">A(2,4)</span> را مشخص کنید.</li>
+      <li>نقطه <span dir="ltr">B(2+h,(2+h)²)</span> را برای <span dir="ltr">h=1, 0.5, 0.1, 0.01</span> مشخص کنید.</li>
+      <li>شیب خط <span dir="ltr">AB</span> را حساب کنید و جدول را کامل کنید.</li>
+      <li>چه الگویی می‌بینید؟</li>
+      <li>وقتی <span dir="ltr">h</span> به صفر نزدیک می‌شود، شیب خط <span dir="ltr">AB</span> به چه عددی نزدیک می‌شود؟</li>
+      <li>حد زیر را بنویسید و مقدار آن را تشخیص دهید:
+        <div class="formula">lim<sub>h→0</sub> [(2+h)² − 4] / h</div>
+      </li>
+      <li>نتیجه را به زبان خود بیان کنید: «مشتق در یک نقطه یعنی ................»</li>
+    </ol>
+  </section>
+
+  <section class="card reveal">
+    <h2>۵. روش چهارم: بارش فکری</h2>
+
+    <h3>مفهوم روش</h3>
+    <p>در بارش فکری، همه دانش‌آموزان آزادانه ایده می‌دهند. معلم هیچ ایده‌ای را مسخره یا رد نمی‌کند؛ همه ایده‌ها شنیده و یادداشت می‌شوند. سپس ایده‌ها دسته‌بندی و نقد می‌شوند.</p>
+
+    <h3>قواعد بارش فکری</h3>
+    <ol>
+      <li>هیچ ایده‌ای در مرحله اول رد یا مسخره نمی‌شود.</li>
+      <li>کمیت ایده‌ها مهم است.</li>
+      <li>ایده‌ها را می‌توان ترکیب و بهبود داد.</li>
+      <li>بعد از پایان بارش، ایده‌ها دسته‌بندی و نقد می‌شوند.</li>
+    </ol>
+
+    <h3>معیار نمره‌دهی ایده‌ها از ۱ تا ۵</h3>
+    <ul>
+      <li><strong>۵:</strong> دقیق، درست و نزدیک به تعریف مشتق</li>
+      <li><strong>۴:</strong> درست اما ناقص یا نیازمند تکمیل</li>
+      <li><strong>۳:</strong> قابل بررسی و مرتبط</li>
+      <li><strong>۲:</strong> مرتبط ولی نادقیق</li>
+      <li><strong>۱:</strong> نامرتبط با سؤال</li>
+    </ul>
+
+    <h3>اجرای تدریس</h3>
+    <p><strong>سؤال آغازین:</strong> «چگونه می‌توان شیب یک منحنی را در یک نقطه پیدا کرد؟»</p>
+    <p>معلم ایده‌ها را روی تخته می‌نویسد و بعد از پایان بارش، به هر ایده از ۱ تا ۵ نمره می‌دهد.</p>
+
+    <table>
+      <thead>
+        <tr><th>ایده دانش‌آموز</th><th>دسته‌بندی/وضعیت</th><th>نقد/بازخورد معلم</th><th>نمره (۱–۵)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>خط مماس رسم کنیم</td><td>هندسی</td><td>ایده خوب؛ ولی شیب مماس را چگونه حساب کنیم؟</td><td>۳</td></tr>
+        <tr><td>دو نقطه نزدیک بگیریم</td><td>حدی</td><td>ایده دقیق‌تر؛ باید بازه را کوچک کنیم.</td><td>۴</td></tr>
+        <tr><td>از سرعت استفاده کنیم</td><td>واقعی</td><td>ارتباط خوبی با نرخ تغییر دارد.</td><td>۳</td></tr>
+        <tr><td>همه حالت‌ها را بشماریم</td><td>نامرتبط</td><td>برای احتمال خوب است، نه شیب منحنی.</td><td>۱</td></tr>
+        <tr><td>از فرمول شیب خط استفاده کنیم</td><td>جبری</td><td>درست است؛ اما برای دو نقطه.</td><td>۴</td></tr>
+        <tr><td>حد بگیریم</td><td>تحلیلی</td><td>ایده کلیدی؛ باید بررسی شود.</td><td>۵</td></tr>
+      </tbody>
+    </table>
+
+    <h3>جمع‌بندی بارش فکری</h3>
+    <p>معلم ایده‌ها را به سه دسته تقسیم می‌کند:</p>
+    <ol>
+      <li>ایده‌های هندسی: خط مماس، خط قاطع.</li>
+      <li>ایده‌های جبری: فرمول شیب، حد.</li>
+      <li>ایده‌های واقعی: سرعت، نرخ تغییر.</li>
+    </ol>
+    <p>سپس می‌گوید: «ترکیب ایده‌های هندسی و جبری به تعریف مشتق می‌رسد.»</p>
+
+    <h3>پیوست ۴: برگه بارش فکری</h3>
+    <p><strong>سؤال:</strong> چگونه شیب منحنی <span dir="ltr">y=x²</span> را در نقطه <span dir="ltr">x=2</span> به‌دست آوریم؟</p>
+    <table>
+      <thead>
+        <tr><th>ردیف</th><th>ایده</th><th>درست/نادرست/نیازمند بررسی</th><th>دلیل نمره</th><th>نمره (۱–۵)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>۱</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>۲</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>۳</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>۴</td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+    <p><strong>پرسش نقدی:</strong> کدام ایده به تعریف مشتق نزدیک‌تر است؟ چرا؟</p>
+    <p><strong>تمرین:</strong> برای <span dir="ltr">f(x)=x²</span> در <span dir="ltr">x=2</span>، با ایده «نزدیک کردن دو نقطه» شیب مماس را حساب کنید.</p>
+  </section>
+
+  <section class="card reveal">
+    <h2>۶. ارزشیابی و جمع‌بندی</h2>
+
+    <h3>ارزشیابی تکوینی</h3>
+    <ul>
+      <li>پرسش شفاهی درباره تفاوت شیب خط قاطع و شیب مماس</li>
+      <li>مشاهده عملکرد دانش‌آموزان در تکمیل جدول <span dir="ltr">h</span></li>
+      <li>بررسی کاربرگ برونر و آزوبل</li>
+      <li>بررسی نمره‌دهی ۱ تا ۵ به ایده‌های بارش فکری</li>
+    </ul>
+
+    <h3>ارزشیابی پایانی (پیوست ۵)</h3>
+    <ol>
+      <li>تعریف مشتق در نقطه <span dir="ltr">x=a</span> را بنویسید.</li>
+      <li>تعبیر هندسی مشتق چیست؟</li>
+      <li>برای <span dir="ltr">f(x)=x²</span>، مقدار <span dir="ltr">f′(2)</span> را با تعریف حساب کنید.</li>
+      <li>جدول زیر را کامل کنید و نتیجه بگیرید:
+        <table>
+          <thead><tr><th>مقدار h</th><th>مقدار [(3+h)² − 9] / h</th></tr></thead>
+          <tbody>
+            <tr><td>0.1</td><td></td></tr>
+            <tr><td>0.01</td><td></td></tr>
+          </tbody>
+        </table>
+      </li>
+      <li>در یک جمله توضیح دهید چرا مشتق را «حد شیب خط قاطع» می‌نامیم.</li>
+    </ol>
+
+    <h3>جمع‌بندی نهایی</h3>
+    <p>مفهوم مشتق از دو مسیر آشنا ساخته می‌شود:</p>
+    <ul>
+      <li><strong>مسیر واقعی:</strong> سرعت و نرخ تغییر</li>
+      <li><strong>مسیر هندسی:</strong> شیب خط قاطع و نزدیک شدن به خط مماس</li>
+    </ul>
+    <p>در پایان، معلم فرمول اصلی را روی تخته می‌نویسد:</p>
+    <div class="formula">f′(a) = lim<sub>h→0</sub> [f(a+h) − f(a)] / h</div>
+    <p><strong>مشتق در یک نقطه = شیب خط مماس بر نمودار در آن نقطه = حد شیب خط‌های قاطع.</strong></p>
+  </section>
+
+  <section class="card reveal">
+    <h2>۷. جمع‌بندی روش‌ها در یک نگاه</h2>
+    <table>
+      <thead>
+        <tr><th>روش</th><th>نقش معلم</th><th>نقش دانش‌آموز</th><th>خروجی</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>پیش‌سازماندهنده</td><td>آماده‌سازی ذهن</td><td>اتصال دانسته‌های قبلی</td><td>آمادگی برای مفهوم جدید</td></tr>
+        <tr><td>آزوبل</td><td>ارائه سازمان‌یافته و معنادار</td><td>دریافت فعال و مقایسه</td><td>فهم تعریف و مثال</td></tr>
+        <tr><td>برونر</td><td>راهنمایی برای کشف</td><td>کاوش و کشف فرمول</td><td>کشف رابطه حد و شیب مماس</td></tr>
+        <tr><td>بارش فکری</td><td>تسهیل و ثبت ایده‌ها</td><td>ایده‌دهی آزاد و نقد</td><td>دسته‌بندی ایده‌ها و رسیدن به تعریف</td></tr>
+      </tbody>
+    </table>
+
+    <p style="text-align:center; margin-top:22px;">
+      <strong>نام ارائه‌دهنده:</strong> امیررضا واحدی<br>
+      <strong>استاد:</strong> شعبانی‌فر<br>
+      <strong>پایان طرح درس</strong>
+    </p>
+  </section>
+
+</main>
+
+<script>
+/* ===== ذخیره PDF ===== */
+function savePDF() {
+  window.print();
+}
+
+/* ===== ذخیره Word ===== */
+function saveWord() {
+  const contentEl = document.getElementById('content');
+  // حذف کلاس reveal برای خروجی تمیز
+  const clone = contentEl.cloneNode(true);
+  clone.querySelectorAll('.reveal').forEach(el => el.classList.remove('reveal'));
+
+  const styles = `
+    @page { size: A4; margin: 2cm; }
+    body { font-family: 'B Nazanin','Tahoma',sans-serif; direction: rtl; text-align: right; line-height: 1.9; font-size: 12pt; color: #111; }
+    h1 { color: #1a3d6d; text-align: center; border-bottom: 2px solid #1a3d6d; padding-bottom: 8px; }
+    h2 { color: #1a3d6d; border-right: 5px solid #c9a227; padding-right: 10px; margin-top: 20px; }
+    h3 { color: #2c3e60; }
+    p { margin: 6px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+    th, td { border: 1px solid #555; padding: 6px 8px; text-align: center; }
+    th { background: #e8eef7; color: #1a3d6d; }
+    .formula { direction: ltr; text-align: center; font-family: 'Cambria Math','Times New Roman',serif; background: #f2f6ff; padding: 10px; border: 1px solid #d8e1f0; border-right: 4px solid #1a3d6d; }
+    .header-card { background: #1a3d6d; color: white; padding: 20px 24px; border-radius: 10px; margin-bottom: 16px; }
+    .header-card h1 { color: white; border-color: #c9a227; text-align: center; }
+    .header-card strong { color: #c9a227; }
+    .header-card .meta p { margin: 2px 0; }
+    .card { padding: 0; margin: 10px 0; }
+    [dir="ltr"] { font-family: 'Cambria Math','Times New Roman',serif; }
+  `;
+
+  const html = '<!DOCTYPE html>'
+    + '<html dir="rtl" lang="fa" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    + '<head><meta charset="UTF-8"><title>طرح درس مشتق - امیررضا واحدی</title>'
+    + '<style>' + styles + '</style></head><body>'
+    + clone.innerHTML
+    + '</body></html>';
+
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'طرح-درس-مشتق-امیررضا-واحدی.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ===== مدال اشتراک‌گذاری ===== */
+function openShare() {
+  document.getElementById('shareModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const url = window.location.href;
+  const input = document.getElementById('urlInput');
+  if (url.startsWith('http')) input.value = url;
+  updateQR();
+}
+
+function closeShare() {
+  document.getElementById('shareModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function updateQR() {
+  const url = document.getElementById('urlInput').value.trim();
+  const img = document.getElementById('qrImage');
+  const msg = document.getElementById('qrMessage');
+
+  if (!url || url.startsWith('file:')) {
+    img.style.display = 'none';
+    msg.style.display = 'block';
+    msg.textContent = url.startsWith('file:')
+      ? 'این فایل به‌صورت محلی (file://) باز شده است. برای ساخت QR، آن را روی یک لینک آنلاین قرار دهید و آدرس را در کادر زیر وارد کنید.'
+      : 'برای ساخت QR، آدرس آنلاین صفحه را در کادر زیر وارد کنید.';
+    return;
+  }
+  if (!/^https?:\/\//i.test(url)) {
+    msg.style.display = 'block';
+    img.style.display = 'none';
+    msg.textContent = 'آدرس باید با http:// یا https:// شروع شود.';
+    return;
+  }
+  msg.style.display = 'none';
+  img.style.display = 'block';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240'
+    + '&data=' + encodeURIComponent(url)
+    + '&bgcolor=ffffff&color=1a3d6d&qzone=2';
+}
+
+function copyLink(btn) {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ کپی شد!';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1800);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ کپی شد!';
+    setTimeout(() => { btn.textContent = 'کپی لینک'; }, 1800);
+  });
+}
+
+/* بستن مدال با Esc */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeShare();
+});
+
+/* اگر صفحه آنلاین است، QR را از ابتدا آماده کن */
+if (window.location.href.startsWith('http')) {
+  document.getElementById('urlInput').value = window.location.href;
+}
+</script>
+
+</body>
+</html>
